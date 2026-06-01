@@ -1,0 +1,13 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Prisma requires at least one model; geofence checks use raw PostGIS SQL only.
+model HealthCheck {
+  id Int @id @default(1)
+}
