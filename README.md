@@ -2,9 +2,9 @@
 
 Technical demo for a lead-routing platform proposal. It implements three required capabilities in a single **Next.js 14 App Router** project:
 
-1. **Multi-tenant middleware** — subdomain from `Host` → mock Redis → request headers → 404 if unknown  
-2. **PostGIS geofence API** — `GET /api/geofence?lat=&lng=` using Prisma `$queryRaw` + `ST_Contains`  
-3. **Real-time updates** — Socket.io counter synced across browser tabs in under 500ms  
+1. **Multi-tenant middleware** — subdomain from `Host` → mock Redis → request headers → 404 if unknown
+2. **PostGIS geofence API** — `GET /api/geofence?lat=&lng=` using Prisma `$queryRaw` + `ST_Contains`
+3. **Real-time updates** — Socket.io counter synced across browser tabs in under 500ms
 
 ---
 
@@ -26,13 +26,13 @@ Technical demo for a lead-routing platform proposal. It implements three require
 
 ## Tech stack
 
-| Layer | Choice |
-|-------|--------|
-| Framework | Next.js 14.2 (App Router) |
-| Language | TypeScript |
-| Database | PostgreSQL 16 + PostGIS (Docker) |
-| ORM | Prisma 5 (`$queryRaw` tagged templates) |
-| Real-time | Socket.io 4 (custom `server.ts`) |
+| Layer        | Choice                                         |
+| ------------ | ---------------------------------------------- |
+| Framework    | Next.js 14.2 (App Router)                      |
+| Language     | TypeScript                                     |
+| Database     | PostgreSQL 16 + PostGIS (Docker)               |
+| ORM          | Prisma 5 (`$queryRaw` tagged templates)        |
+| Real-time    | Socket.io 4 (custom `server.ts`)               |
 | Tenant store | In-memory mock Redis (`src/lib/redis-mock.ts`) |
 
 ---
@@ -41,12 +41,12 @@ Technical demo for a lead-routing platform proposal. It implements three require
 
 Install before you begin:
 
-| Tool | Version | Notes |
-|------|---------|--------|
-| **Node.js** | 18.x or 20.x | `node -v` |
-| **npm** | 9+ | ships with Node |
-| **Docker** | 20+ | Docker Desktop or Engine + Compose |
-| **Git** | any | for pushing a public repo |
+| Tool        | Version      | Notes                              |
+| ----------- | ------------ | ---------------------------------- |
+| **Node.js** | 18.x or 20.x | `node -v`                          |
+| **npm**     | 9+           | ships with Node                    |
+| **Docker**  | 20+          | Docker Desktop or Engine + Compose |
+| **Git**     | any          | for pushing a public repo          |
 
 Optional: `curl` for API checks from the terminal.
 
@@ -57,8 +57,8 @@ Optional: `curl` for API checks from the terminal.
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USER/new-lead-next-demo.git
-cd new-lead-next-demo
+git clone https://github.com/devgurru/tenant-geospatial-realtime-platform.git
+cd tenant-geospatial-realtime-platform
 npm install
 ```
 
@@ -114,11 +114,11 @@ Expected console output:
 
 Use a **subdomain** host (bare `http://localhost:3000` returns 404 by design):
 
-| Tenant | URL |
-|--------|-----|
-| Acme Corp | http://acme.localhost:3000 |
-| Globex Inc | http://globex.localhost:3000 |
-| Initech | http://initech.localhost:3000 |
+| Tenant     | URL                           |
+| ---------- | ----------------------------- |
+| Acme Corp  | http://acme.localhost:3000    |
+| Globex Inc | http://globex.localhost:3000  |
+| Initech    | http://initech.localhost:3000 |
 
 Modern browsers resolve `*.localhost` to `127.0.0.1` — **no `/etc/hosts` edits required** on Chrome, Firefox, or Edge.
 
@@ -126,11 +126,11 @@ Modern browsers resolve `*.localhost` to `127.0.0.1` — **no `/etc/hosts` edits
 
 ## Environment variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL connection string for Prisma / PostGIS |
-| `PORT` | No | `3000` | HTTP port for `server.ts` |
-| `NEXT_PUBLIC_APP_URL` | No | — | Optional; used for documentation / future client config |
+| Variable              | Required | Default | Description                                             |
+| --------------------- | -------- | ------- | ------------------------------------------------------- |
+| `DATABASE_URL`        | Yes      | —       | PostgreSQL connection string for Prisma / PostGIS       |
+| `PORT`                | No       | `3000`  | HTTP port for `server.ts`                               |
+| `NEXT_PUBLIC_APP_URL` | No       | —       | Optional; used for documentation / future client config |
 
 ---
 
@@ -138,27 +138,27 @@ Modern browsers resolve `*.localhost` to `127.0.0.1` — **no `/etc/hosts` edits
 
 ### How it works
 
-1. `src/middleware.ts` reads the `Host` header (e.g. `acme.localhost:3000`).  
-2. Subdomain `acme` is extracted (`src/lib/subdomain.ts`).  
-3. Mock Redis lookup runs (`src/lib/redis-mock.ts`, key `tenant:acme`).  
-4. On success, headers are set: `x-tenant-id`, `x-tenant-name`, `x-tenant-subdomain`.  
+1. `src/middleware.ts` reads the `Host` header (e.g. `acme.localhost:3000`).
+2. Subdomain `acme` is extracted (`src/lib/subdomain.ts`).
+3. Mock Redis lookup runs (`src/lib/redis-mock.ts`, key `tenant:acme`).
+4. On success, headers are set: `x-tenant-id`, `x-tenant-name`, `x-tenant-subdomain`.
 5. On failure → **HTTP 404**.
 
 ### Valid tenant URLs
 
-| Subdomain | Company | URL |
-|-----------|---------|-----|
-| `acme` | Acme Corp | http://acme.localhost:3000 |
-| `globex` | Globex Inc | http://globex.localhost:3000 |
-| `initech` | Initech | http://initech.localhost:3000 |
+| Subdomain | Company    | URL                           |
+| --------- | ---------- | ----------------------------- |
+| `acme`    | Acme Corp  | http://acme.localhost:3000    |
+| `globex`  | Globex Inc | http://globex.localhost:3000  |
+| `initech` | Initech    | http://initech.localhost:3000 |
 
 ### URLs that must return 404
 
-| URL | Reason |
-|-----|--------|
+| URL                           | Reason                      |
+| ----------------------------- | --------------------------- |
 | http://unknown.localhost:3000 | Subdomain not in mock Redis |
-| http://foo.localhost:3000 | Same |
-| http://localhost:3000 | No subdomain on host |
+| http://foo.localhost:3000     | Same                        |
+| http://localhost:3000         | No subdomain on host        |
 
 ### Verify with curl
 
@@ -210,7 +210,7 @@ curl "http://acme.localhost:3000/api/geofence?lat=37.8049&lng=-122.2711"
 
 ### Implementation notes
 
-- Polygon WKT is hardcoded in `src/lib/geofence.ts`.  
+- Polygon WKT is hardcoded in `src/lib/geofence.ts`.
 - `src/app/api/geofence/route.ts` runs:
 
   ```sql
@@ -226,17 +226,17 @@ curl "http://acme.localhost:3000/api/geofence?lat=37.8049&lng=-122.2711"
 
 On any valid tenant URL, use the **PostGIS geofence check** card:
 
-- **Sample inside** / **Sample outside** — pre-filled coordinates  
-- **Check geofence** — calls the API and shows INSIDE / OUTSIDE  
+- **Sample inside** / **Sample outside** — pre-filled coordinates
+- **Check geofence** — calls the API and shows INSIDE / OUTSIDE
 
 ---
 
 ## Socket.io real-time testing
 
-1. Open http://acme.localhost:3000 (or globex / initech) in **two browser tabs**.  
-2. Wait for **Connected** under the counter.  
-3. Click **Increment** in one tab.  
-4. The other tab’s counter updates immediately (typically &lt;50ms on localhost).  
+1. Open http://acme.localhost:3000 (or globex / initech) in **two browser tabs**.
+2. Wait for **Connected** under the counter.
+3. Click **Increment** in one tab.
+4. The other tab’s counter updates immediately (typically &lt;50ms on localhost).
 5. **Last round-trip** shows latency for the click that triggered the update.
 
 Socket.io is mounted on the same server as Next.js (`server.ts`), path: `/api/socketio`.
@@ -270,9 +270,9 @@ npm run db:up
 
 ### Geofence returns 503
 
-- Container not running: `docker compose ps`  
-- Schema not pushed: `npm run db:push`  
-- Wrong `DATABASE_URL` in `.env`  
+- Container not running: `docker compose ps`
+- Schema not pushed: `npm run db:push`
+- Wrong `DATABASE_URL` in `.env`
 
 ### `localhost:3000` shows 404
 
@@ -280,7 +280,7 @@ Expected. Use `http://acme.localhost:3000` (or globex / initech).
 
 ### Counter does not sync across tabs
 
-- Both tabs must use the **same tenant host** (e.g. both `acme.localhost`).  
+- Both tabs must use the **same tenant host** (e.g. both `acme.localhost`).
 - Dev server must be started with `npm run dev` (not `next dev` alone — Socket.io lives in `server.ts`).
 
 ### TypeScript / Prisma
@@ -323,12 +323,10 @@ Visit tenant URLs the same way as in development (subdomain hosts).
 
 ## GitHub submission
 
-The client requires a **public GitHub repository** (no zip files).
-
 ```bash
 git add .
 git commit -m "Lead routing demo: multi-tenant, PostGIS, Socket.io"
-git remote add origin https://github.com/YOUR_USER/new-lead-next-demo.git
+git remote add origin https://github.com/devgurru/tenant-geospatial-realtime-platform.git
 git branch -M main
 git push -u origin main
 ```
