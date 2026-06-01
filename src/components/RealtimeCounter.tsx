@@ -5,7 +5,11 @@ import { io, type Socket } from "socket.io-client";
 
 const SOCKET_PATH = "/api/socketio";
 
-export function RealtimeCounter() {
+type RealtimeCounterProps = {
+  tenantSubdomain: string;
+};
+
+export function RealtimeCounter({ tenantSubdomain }: RealtimeCounterProps) {
   const socketRef = useRef<Socket | null>(null);
   const [count, setCount] = useState(0);
   const [connected, setConnected] = useState(false);
@@ -15,6 +19,7 @@ export function RealtimeCounter() {
     const socket = io({
       path: SOCKET_PATH,
       transports: ["websocket", "polling"],
+      query: { tenant: tenantSubdomain },
     });
 
     socketRef.current = socket;
@@ -29,7 +34,7 @@ export function RealtimeCounter() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, []);
+  }, [tenantSubdomain]);
 
   const increment = useCallback(() => {
     const socket = socketRef.current;
@@ -48,8 +53,13 @@ export function RealtimeCounter() {
         3. Real-time counter (Socket.io)
       </h2>
       <p className="mt-1 text-sm text-zinc-600">
-        Open this page in two tabs on the same tenant host. Click increment in
-        one tab; the other updates in under 500ms.
+        Open this page in <strong>two tabs on the same tenant</strong> (e.g. both{" "}
+        <code className="text-xs">acme.localhost</code>). Increment in one tab
+        updates only that tenant&apos;s room — other tenants (e.g. initech) stay
+        separate.
+      </p>
+      <p className="mt-2 text-xs font-medium text-zinc-500">
+        Room: tenant:{tenantSubdomain}
       </p>
       <p className="mt-4 text-4xl font-mono font-bold tabular-nums text-zinc-900">
         {count}

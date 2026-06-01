@@ -1,8 +1,12 @@
+import { headers } from "next/headers";
 import { GeofenceChecker } from "@/components/GeofenceChecker";
 import { RealtimeCounter } from "@/components/RealtimeCounter";
 import { TenantBanner } from "@/components/TenantBanner";
+import { TENANT_SUBDOMAIN_HEADER } from "@/lib/tenant-headers";
 
 export default function Home() {
+  const tenantSubdomain = headers().get(TENANT_SUBDOMAIN_HEADER) ?? "unknown";
+
   return (
     <div className="min-h-screen bg-zinc-50 px-4 py-10 font-[family-name:var(--font-geist-sans)]">
       <div className="mx-auto flex max-w-3xl flex-col gap-8">
@@ -18,7 +22,7 @@ export default function Home() {
 
         <TenantBanner />
         <GeofenceChecker />
-        <RealtimeCounter />
+        <RealtimeCounter tenantSubdomain={tenantSubdomain} />
       </div>
     </div>
   );
